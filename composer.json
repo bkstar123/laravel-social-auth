@@ -1,0 +1,34 @@
+{
+    "name": "bkstar123/social-auth",
+    "description": "A thin wrapper of Socialite package for an easy implementation of the social login for Laravel applications",
+    "keywords": [
+        "laravel",
+        "social-login"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hoang Anh Tuan",
+            "email": "hoangtuandhbk@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.1.3",
+        "laravel/socialite": "^4.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bkstar123\\SocialAuth\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bkstar123\\SocialAuth\\SocialAuthServiceProvider"
+            ]
+        }
+    }
+}
