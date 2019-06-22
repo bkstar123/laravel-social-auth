@@ -1,5 +1,5 @@
 # laravel-social-auth    
-Provide a thin wrapper over Socialite package for an easy implementation of the social login for Laravel applications   
+Provide a thin wrapper over the Socialite package for an easy implementation of the social login for Laravel applications   
 
 ## 1.Requirements  
 
