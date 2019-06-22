@@ -3,14 +3,14 @@ Laravel provides an official package named as Socialite to enable an easy implem
 
 Sometimes, the repetitious work can cause an inertia for you to start a new project. To eliminate this issue and quickly gain a momentum for a new idea, this package is built to provide a thin layer wrapping over the Socialite package for the even easier implementation of the social login for a Laravel application.     
 
-## 1.Requirements  
+## 1 Requirements  
 
 It is recommended to install this package with PHP version 7.1.3+ and Laravel Framework version 5.5+   
 
-## 2.Installation  
+## 2 Installation  
     composer require bkstar123/social-auth
 
-## 3. Usage
+## 3 Usage
 
 ### 3.1 Default usage
 
@@ -24,6 +24,7 @@ $table->string('email')->unique();
 ```  
 
 **Note**: If you already run the user migration, you should create another migration to update ```users``` table with these new columns (```name, avatar, email```), for example:  
+```php artisan make:migration update_users_table```  
 
 **yyyy_mm_dd_xxxxxxxx_update_users_table.php**:  
 ```php
@@ -77,7 +78,7 @@ Route::get('/login/{provider}', 'Auth\LoginController@redirectToSocialProvider')
 Route::get('/login/{provider}/callback', 'Auth\LoginController@handleSocialProviderCallback')
      ->name('login.social.callback');
 ```
-- In view file where you put login form, add social login link, for example:  
+- In the view file where you have the login form, add a social login link, for example:  
 ```html
 <!-- For Google login -->
 <a href="{{ route('login.social', ['provider' => 'google']) }}" 
@@ -108,7 +109,7 @@ return [
 
 ### 3.2 Custom usage
 
-#### If you do not want to use the package default migration:
+#### 3.2.1 If you do not want to use the package default migration:
 - Put the following key/value in the .env file:  
 ```BKSTAR123_SOCIALAUTH_LOAD_MIGRATION=false```
 
@@ -153,8 +154,9 @@ class CreateCustomerSocialAccountsTable extends Migration
 ```
 
 **Note**: ```provider_name```, ```provider_id``` are required to be named as they are in the migration, the foreign key (```customer_id``` in the above example) can be named appropriately depending on your use cases.  
+- Run ```php artisan migrate```  
 
-#### You can define your custom social account model which has belongsTo relationship with you custom user model
+#### 3.2.2 You can define your custom social account model which has a ```belongsTo``` relationship with you custom user model
 **app/Models/CustomerSocialAccount.php**:  
 ```php
 <?php
@@ -173,7 +175,7 @@ class CustomerSocialAccount extends SocialAccountBase
 }
 ```
 
-#### You can also tell the package to use your custom social account and user models
+#### 3.2.3 You can also tell the package to use your custom social account and user models
 
 For example:  
 - In your user model like ```app/Models/Customer.php```:  
@@ -201,7 +203,7 @@ protected function getSocialAccountModelClass()
 }
 ```
 
-#### You can change what kind of the social data you want to map to the user which is to be persisted to the database
+#### 3.2.4 You can change which kind of the social data you want to map to the user which is to be persisted to the database
 
 For example:  
 Assuming that your ```users``` table has ```social_avatar```, ```email```. Then, in the controller which handles the login logic, add the following method:  
@@ -215,9 +217,9 @@ protected function mapUserWithSocialData($socialUser)
 }
 ```
 
-#### You can use beforeFirstSocialLogin() hook to add more business logic before signing a user in via her social account
+#### 3.2.5 You can use beforeFirstSocialLogin() hook to add more business logic before signing in a user using her social account at the first time
 
-For example, you may need to set ```email_verified_at``` for a user before signing her in via her social account if your application enforcing the logic that all users must be verified before being able to use some features.  
+For example, you may need to set ```email_verified_at``` for a user before signing her in using her social account at the first time if your application enforces a logic that all users must be verified before being able to use some features.  
 
 To do so, in the controller which handles the login logic, add the following method:  
 ```php
@@ -230,7 +232,7 @@ protected function beforeFirstSocialLogin($user, $socialUser)
 }
 ```
 
-#### You can customize the action that is to be taken after successfully signing in a her via her social account
+#### 3.2.6 You can customize the action that is to be taken after successfully signing in a user using her social account
 
 For example: You may want to explicitly redirect the authenticated user to a dashboard  
 ```php
@@ -240,9 +242,9 @@ protected function postSocialLogIn()
 }
 ```
 
-#### You can customize the action that is to be taken if your application fails to get data from the social provider
+#### 3.2.7 You can customize the action that is to be taken if your application fails to get data from the social provider
 
-For example: You may want to redirect the user to customer login route in this case  
+For example: You may want to redirect the user to the customer login page in this case  
 ```php
 protected function actionIfFailingToGetSocialData()
 {
