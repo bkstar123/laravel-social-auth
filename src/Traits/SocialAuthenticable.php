@@ -9,33 +9,19 @@ namespace Bkstar123\SocialAuth\Traits;
 
 use App\User;
 use Exception;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Bkstar123\SocialAuth\Exceptions\MethodDoesNotExistException;
-use Bkstar123\SocialAuth\Exceptions\PropertyDoesNotExistException;
+use Bkstar123\SocialAuth\Models\SocialAccount;
 
 trait SocialAuthenticable
 {
-    /**
-     * Return the class name of the user model
-     * This method can be overwritten by an extending class
-     * @return string
-     */
-    protected function getUserModelClass()
-    {
-        return User::class;
-    }
-
     /**
      * Redirect user to the social provider for authorization
      *
      * @param string  $provider
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function redirectToProvider(string $provider)
+    public function redirectToSocialProvider(string $provider)
     {
         return Socialite::driver($provider)->redirect();
     }
@@ -46,88 +32,122 @@ trait SocialAuthenticable
      * @param string  $provider
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function handleProviderCallback(string $provider)
+    public function handleSocialProviderCallback(string $provider)
     {
         try {
             $socialUser = Socialite::driver($provider)->user();
         } catch (Exception $e) {
-            return redirect()->route('login');
+            return $this->actionIfFailingToGetSocialData();
         }
 
-        $authUser = $this->findOrCreateUser($socialUser, $provider);
+        $authUser = $this->findOrCreateUserFromSocialAccount($socialUser, $provider);
 
-        Auth::login($authUser, true);
+        if (method_exists($this, 'guard')) {
+            $this->guard()->login($authUser, true);
+        } else {
+            Auth::guard()->login($authUser, true);
+        }
 
-        return $this->postLogInAction();
+        return $this->postSocialLogIn();
     }
 
     /**
      * Check if the given social account is already associated with a user
      * if not, then create the user & associate it with the social account
      *
-     * @param Socialite user  $socialUser
+     * @param object $socialUser
      * @param string  $provider
      * @return \App\User
      */
-    protected function findOrCreateUser($socialUser, $provider)
+    protected function findOrCreateUserFromSocialAccount($socialUser, $provider)
     {
-        if (!property_exists($this, 'socialAccountModel')) {
-            throw new PropertyDoesNotExistException('The property socialAccountModel does not exist in '.get_class($this));
-        }
-
         // check if the user has ever logged in with this social account
-        $account = $this->socialAccountModel::where('provider_name', $provider)
-                                            ->where('provider_id', $socialUser->getId())
-                                            ->first();
+        $account = $this->getSocialAccountModelClass()::where('provider_name', $provider)
+                            ->where('provider_id', $socialUser->getId())
+                            ->first();
 
         if ($account) {
-            if (!method_exists($account, 'user')) {
-                throw new MethodDoesNotExistException(
-                    'The method user() does not exist in '.get_class($account).
-                    '. This method must be defined and return the '.BelongsTo::class.' relationship to the associated user'
-                );
-            }
             return $account->user;
         } else {
             $user = $this->getUserModelClass()::where('email', $socialUser->getEmail())->first();
 
             if (!$user) {
-                $user = $this->getUserModelClass()::create([
-                    'email' => $socialUser->getEmail(),
-                    'name' => $socialUser->getName(),
-                    'social_avatar' => $socialUser->getAvatar(),
-                    'username' => $socialUser->getNickName()
-                ]);
-            }
-
-            if (!method_exists($user, 'accounts')) {
-                throw new MethodDoesNotExistException(
-                    'The method accounts() does not exist in '.get_class($user).
-                    '. This method must be defined and return the '.HasMany::class.' relationship to the associated social accounts'
-                );
+                $user = $this->getUserModelClass()::create($this->mapUserWithSocialData($socialUser));
             }
 
             $user->accounts()->create([
                 'provider_name' => $provider,
                 'provider_id' => $socialUser->getid()
             ]);
-            
-            $user->email_verified_at = $user->email_verified_at ?? Carbon::now();
-            
-            $user->save();
+
+            $this->beforeFirstSocialLogin($user, $socialUser);
 
             return $user;
         }
     }
 
     /**
-     * Take post-login actions
-     *
+     * Return the class name of the user model
+     * This method can be overwritten by an hosting class
+     * @return string
+     */
+    protected function getUserModelClass()
+    {
+        return User::class;
+    }
+
+    /**
+     * Return the class name of the social account model
+     * This method can be overwritten by an hosting class
+     * @return string
+     */
+    protected function getSocialAccountModelClass()
+    {
+        return SocialAccount::class;
+    }
+
+    /**
+     * An after hook which is to be call after a social login
+     * This method can be overwritten by an hosting class
      * @return \Illuminate\Http\RedirectResponse
      */
-    protected function postLogInAction()
+    protected function postSocialLogIn()
     {
-        return $this->authenticated(request(), $this->guard()->user())
+        return method_exists($this, 'authenticated') && $this->authenticated(request(), $this->guard()->user())
                 ?: redirect()->intended($this->redirectPath());
+    }
+
+    /**
+     * Map the user with his/her social data
+     * This method can be overwritten by an hosting class
+     * @return array
+     */
+    protected function mapUserWithSocialData($socialUser)
+    {
+        return [
+            'name' => $socialUser->getName(),
+            'email' => $socialUser->getEmail(),
+            'avatar' => $socialUser->getAvatar(),
+        ];
+    }
+
+    /**
+     * Specify the action to be taken after the failure of getting user from a social provider
+     * This method can be overwritten by an hosting class
+     */
+    protected function actionIfFailingToGetSocialData()
+    {
+        return redirect()->route('login');
+    }
+
+    /**
+     * A before hook which is to be called right before the first social login
+     * This method can be overwritten by an hosting class
+     * @param $user
+     * @param $socialUser
+     */
+    protected function beforeFirstSocialLogin($user, $socialUser)
+    {
+        // optional, to be implemented on the hosting class
     }
 }

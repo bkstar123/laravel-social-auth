@@ -18,8 +18,13 @@ class SocialAuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->mergeConfigFrom(__DIR__.'/Config/bkstar123_socialauth.php', 'services');
-        $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
+        $this->mergeConfigFrom(__DIR__.'/Config/services.php', 'services');
+
+        $this->mergeConfigFrom(__DIR__.'/Config/bkstar123_socialauth.php', 'bkstar123_socialauth');
+
+        if (config('bkstar123_socialauth.loadMigration')) {
+            $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
+        }
     }
 
     /**

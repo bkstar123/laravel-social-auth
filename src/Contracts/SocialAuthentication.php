@@ -15,7 +15,7 @@ interface SocialAuthentication
      * @param string  $provider
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function redirectToProvider(string $provider);
+    public function redirectToSocialProvider(string $provider);
 
     /**
      * Use the authorization code from social provider to exchange for the access token
@@ -23,5 +23,5 @@ interface SocialAuthentication
      * @param string  $provider
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function handleProviderCallback(string $provider);
+    public function handleSocialProviderCallback(string $provider);
 }
