@@ -94,19 +94,6 @@ Route::get('/login/{provider}/callback', 'Auth\LoginController@handleSocialProvi
 ``` 
 Where ```[PROVIDER_NAME]``` can be **GOOGLE, FACEBOOK, TWITTER, LINKEDIN, GITHUB, GITLAB, BITBUCKET**.  
 
-For other community's providers, you must put their configuration (```client_id, client_secret, client_redirect```) in ```config/services.php```, like:  
-```php
-return [
-    ...,
-    'vkontakte' => [
-        'client_id' => env('VKONTAKTE_CLIENT_ID'),
-        'client_secret' => env('VKONTAKTE_CLIENT_SECRET'),
-        'redirect' => env('VKONTAKTE_CLIENT_REDIRECT'),
-    ],
-    ...
-];
-```
-
 ### 3.2 Custom usage
 
 #### 3.2.1 If you do not want to use the package default migration:
