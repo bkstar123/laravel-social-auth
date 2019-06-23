@@ -77,7 +77,7 @@ trait SocialAuthenticable
 
             $user->accounts()->create([
                 'provider_name' => $provider,
-                'provider_id' => $socialUser->getid()
+                'provider_id' => $socialUser->getId()
             ]);
 
             $this->beforeFirstSocialLogin($user, $socialUser);
