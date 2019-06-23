@@ -21,9 +21,10 @@ This package is by default assumed to be used together with the Laravel's defaul
 $table->string('name')->nullable();
 $table->string('avatar')->nullable();
 $table->string('email')->unique();
+$table->string('password')->nullable();
 ```  
 
-**Note**: If you already run the user migration, you should create another migration to update ```users``` table with the new column ```avatar``` and set ```password``` column to be nullable (```email```, ```name``` are already supplied in the Laravel default user migration), for example:  
+**Note**: If you already run the user migration, you should create another migration to update ```users``` table with the new column ```avatar``` and set ```password``` & ```name``` columns to be nullable (```email```, ```name``` are already supplied in the Laravel default user migration), for example:  
 
 Run: ```php artisan make:migration update_users_table```  
 
@@ -45,9 +46,9 @@ class UpdateUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('name')->nullable();
+            $table->string('password')->nullable()->change();
+            $table->string('name')->nullable()->change();
             $table->string('avatar')->nullable();
-            $table->string('email')->unique();
         });
     }
 
@@ -59,9 +60,10 @@ class UpdateUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function(Blueprint $table) {
-            $table->dropColumn('name');
+            \DB::table('users')->truncate();
             $table->dropColumn('avatar');
-            $table->dropColumn('email');
+            $table->string('name')->nullable(false)->change();
+            $table->string('password')->nullable(false)->change();
         });
     }
 }
