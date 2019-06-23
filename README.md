@@ -60,10 +60,12 @@ class UpdateUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function(Blueprint $table) {
+            \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
             \DB::table('users')->truncate();
             $table->dropColumn('avatar');
             $table->string('name')->nullable(false)->change();
             $table->string('password')->nullable(false)->change();
+            \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         });
     }
 }
@@ -128,11 +130,13 @@ class CreateCustomerSocialAccountsTable extends Migration
     public function up()
     {
         Schema::create('customer_social_accounts', function (Blueprint $table) {
-            $table->increments('id');
-            $table->bigInteger('customer_id');
-            $table->string('provider_name')->nullable();
-            $table->string('provider_id')->unique()->nullable();
+            $table->bigIncrements('id');
+            $table->bigInteger('customer_id')->unsigned()->index();
+            $table->string('provider_name');
+            $table->string('provider_user_id');
             $table->timestamps();
+            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+            $table->unique(['provider_name', 'provider_user_id']);
         });
     }
 
@@ -148,7 +152,11 @@ class CreateCustomerSocialAccountsTable extends Migration
 }
 ```
 
-**Note**: ```provider_name```, ```provider_id``` are required to be named as they are in the migration, the foreign key (```customer_id``` in the above example) can be named appropriately depending on your use cases.  
+**Note**: ```provider_name```, ```provider_user_id``` are required to be named as they are in the migration, the foreign key (```customer_id``` in the above example) can be named appropriately depending on your use cases.  
+
+Alternatively, you can publish the package's default migration to ```database/migrations/``` and use it as a starting point for customization.  
+=> Run: ```php artisan vendor:publish --provider="Bkstar123\SocialAuth\SocialAuthServiceProvider"```
+
 - Run ```php artisan migrate```  
 
 #### 3.2.2 You can define your custom social account model which has a ```belongsTo``` relationship with you custom user model

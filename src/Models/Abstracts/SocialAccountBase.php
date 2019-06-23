@@ -17,7 +17,7 @@ abstract class SocialAccountBase extends Model
      * @var array
      */
     protected $fillable = [
-        'provider_name', 'provider_id'
+        'provider_name', 'provider_user_id'
     ];
 
     /**

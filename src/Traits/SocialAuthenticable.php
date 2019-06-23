@@ -63,7 +63,7 @@ trait SocialAuthenticable
     {
         // check if the user has ever logged in with this social account
         $account = $this->getSocialAccountModelClass()::where('provider_name', $provider)
-                            ->where('provider_id', $socialUser->getId())
+                            ->where('provider_user_id', $socialUser->getId())
                             ->first();
 
         if ($account) {
@@ -77,7 +77,7 @@ trait SocialAuthenticable
 
             $user->accounts()->create([
                 'provider_name' => $provider,
-                'provider_id' => $socialUser->getId()
+                'provider_user_id' => $socialUser->getId()
             ]);
 
             $this->beforeFirstSocialLogin($user, $socialUser);

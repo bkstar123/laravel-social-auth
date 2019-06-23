@@ -24,6 +24,10 @@ class SocialAuthServiceProvider extends ServiceProvider
 
         if (config('bkstar123_socialauth.loadMigration')) {
             $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
+        } else {
+            $this->publishes([
+                __DIR__.'/Database/Migrations' => database_path('migrations'),
+            ]);
         }
     }
 
