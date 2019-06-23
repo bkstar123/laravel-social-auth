@@ -14,17 +14,18 @@ It is recommended to install this package with PHP version 7.1.3+ and Laravel Fr
 
 ### 3.1 Default usage
 
-This package is by default assumed to be used together with the Laravel's default authentication guard (as specified in ```config/auth.php```) and ```App\User``` model.  
+This package is by default assumed to be used together with the Laravel's default authentication guard (as specified in ```config/auth.php```) and ```App\User``` model.   
 
-- Modify Laravel's default user migration to make sure it has the following lines:
+- Modify Laravel's default user migration **yyyy-mm-dd-xxxxxxxx_create_users_table** to make sure it has the following lines:  
 ```php
 $table->string('name')->nullable();
 $table->string('avatar')->nullable();
 $table->string('email')->unique();
 ```  
 
-**Note**: If you already run the user migration, you should create another migration to update ```users``` table with these new columns (```name, avatar, email```), for example:  
-```php artisan make:migration update_users_table```  
+**Note**: If you already run the user migration, you should create another migration to update ```users``` table with the new column ```avatar``` and set ```password``` column to be nullable (```email```, ```name``` are already supplied in the Laravel default user migration), for example:  
+
+Run: ```php artisan make:migration update_users_table```  
 
 **yyyy_mm_dd_xxxxxxxx_update_users_table.php**:  
 ```php
@@ -66,10 +67,15 @@ class UpdateUsersTable extends Migration
 }
 ```
 
-- Run migration command:
-```php artisan migrate```  
+- Run: ```composer require doctrine/dbal```
+- Run migration command: ```php artisan migrate```  
 
-- In ```app/User.php```, import and use ```Bkstar123\SocialAuth\Traits\SocialLinkable``` trait  
+- In ```app/User.php```, import and use ```Bkstar123\SocialAuth\Traits\SocialLinkable``` trait. Add ```avatar``` to ```$fillable``` array, like:  
+```php
+protected $fillable = [
+    'name', 'email', 'password', 'avatar'
+];
+```
 - In ```app/Http/Controllers/Auth/LoginController.php```, make it to implement ```Bkstar123\SocialAuth\Contracts\SocialAuthentication``` interface, then import and use ```Bkstar123\SocialAuth\Traits\SocialAuthenticable``` trait  
 - In ```routes/web.php```, add the following routes:  
 ```php
