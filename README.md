@@ -159,7 +159,7 @@ Alternatively, you can publish the package's default migration to ```database/mi
 
 - Run ```php artisan migrate```  
 
-#### 3.2.2 You can define your custom social account model which has a ```belongsTo``` relationship with you custom user model
+#### 3.2.2 You can define your custom social account model which has a ```belongsTo``` relationship with your custom user model
 **app/Models/CustomerSocialAccount.php**:  
 ```php
 <?php
